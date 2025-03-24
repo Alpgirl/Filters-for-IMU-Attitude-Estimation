@@ -48,6 +48,13 @@ def quaternion_multiply(quaternion1, quaternion0):
                      -x1 * z0 + y1 * w0 + z1 * x0 + w1 * y0,
                      x1 * y0 - y1 * x0 + z1 * w0 + w1 * z0], dtype=np.float64)
 
+def angle_rot(vec1, vec2):
+    dot_product = np.dot(vec1.flatten(), vec2.flatten())
+    cross_product = np.cross(vec1.flatten(), vec2.flatten())
+    sin_theta = np.linalg.norm(cross_product)
+    cos_theta = dot_product
+    return np.arctan2(sin_theta, cos_theta)
+
 def calculate_g_distances(quaternions1, quaternions2):
     '''
     Calculating distance (L2 norm) between the gravity vectors orientations in 2 reference frames - 
@@ -73,10 +80,12 @@ def calculate_g_distances(quaternions1, quaternions2):
     print("Difference between G vectors in smartphone and (mocap-observed-smartphone) reference frames")
     plot(g_in_1.reshape(-1, 3) - g_in_2.reshape(-1, 3))
 
-    g_in_1_SE3 = np.array([mrob.SE3(mrob.SO3(), g_in_1_i) for g_in_1_i in g_in_1])
-    g_in_2_SE3 = np.array([mrob.SE3(mrob.SO3(), g_in_1_2) for g_in_1_2 in g_in_2])
+    # treating gravity vectors as direction vectors of quaternions [x, y, z, 0]
+    # to find rotation angle between gravity vectors
+    g_in_1_SO3 = np.array([mrob.SO3(mrob.quat_to_so3(np.hstack((g_in_1_i.flatten(), 0)))) for g_in_1_i in g_in_1])
+    g_in_2_SO3 = np.array([mrob.SO3(mrob.quat_to_so3(np.hstack((g_in_2_i.flatten(), 0)))) for g_in_2_i in g_in_2])
 
-    distance = np.array([mrob.SE3.distance_trans(g_in_1_SE3[i], g_in_2_SE3[i]) for i in range(len(g_in_1_SE3))])
+    distance = np.array([angle_rot(g_in_1[i], g_in_2[i]) for i in range(len(g_in_1))])
 
     return distance
 
@@ -128,7 +137,16 @@ def RPE_g(quaternions1, quaternions2, increment=1):
     
     return distance
 
+def calc_cov(noised, ground_truth):
+    '''
+    Calculating noise covariance of noised data
+    Given that noised = ground_truth + noise, noise cov is:
+    E{(noise)*(noise).T}
+    '''
+    noise = noised - ground_truth
+    return np.cov(noise.T)
 
+# DEPRECATED
 
 def RPE_angvels(angvels1, angvels2, increment=1):
     '''
