@@ -52,38 +52,55 @@ def errors_estimation(quaterniions1, quaterniions2, source1="smartphone", source
     madgwick_distance = utils.calculate_quat_distances(quaterniions1, quaterniions2)
     print("Mean distance between " + source1 + " and " + source2 + " attitude estimations:")
     print(np.mean(madgwick_distance))
+    print("STD of distance between " + source1 + " and " + source2 + " attitude estimations:")
+    print(np.std(madgwick_distance, ddof=1))                                        # ddof = 1 for unbiased std
     print("Distance between " + source1 + " and " + source2 + " attitude estimations:")
     plot(madgwick_distance)
     print("Last distance between " + source1 + " and " + source2 + " attitude estimations:")
     print(madgwick_distance[-1])
-    print("Norm of quaternions - shall be = 1")
-    print(np.linalg.norm(quaterniions2, axis=1))
-    plot(np.linalg.norm(quaterniions2, axis=1))
+    print("RMSE of APE between " + source1 + " and " + source2 + " attitude estimations:")
+    print(utils.RMSE(madgwick_distance))
+    #print("Norm of quaternions - shall be = 1")
+    #print(np.linalg.norm(quaterniions2, axis=1))
+    #plot(np.linalg.norm(quaterniions2, axis=1))
 
     # Checking if gravity vector, rotated by quaternions, align
     d_g = utils.calculate_g_distances(quaterniions1, quaterniions2)
     print("Mean distance between " + source1 + " and " + source2 + " vector g estimations:")
     print(np.mean(d_g))
+    print("STD of distance between " + source1 + " and " + source2 + " attitude estimations:")
+    print(np.std(d_g, ddof=1))                                        # ddof = 1 for unbiased std
     print("Distance between " + source1 + " and " + source2 + " vector g estimations:")
     plot(d_g)
     print("Last distance between " + source1 + " and " + source2 + " vector g estimations:")
     print(d_g[-1])
+    print("RMSE of APE between " + source1 + " and " + source2 + " vector g estimations:")
+    print(utils.RMSE(d_g))
 
     print("Mean Relative Pose Error")
     rpe = utils.RPE(quaterniions1, quaterniions2)
     print(np.mean(rpe))
+    print("STD of distance between " + source1 + " and " + source2 + " attitude estimations:")
+    print(np.std(rpe, ddof=1))                                        # ddof = 1 for unbiased std
     print("Relative Pose Error")
     plot(rpe)
     print("Last RPE between " + source1 + " and " + source2 + " attitude estimations:")
     print(rpe[-1])
+    print("RMSE of RPE between " + source1 + " and " + source2 + " attitude estimations:")
+    print(utils.RMSE(rpe))
 
     print("Mean Relative Pose Error of vector g")
     rpe_g = utils.RPE_g(quaterniions1, quaterniions2)
     print(np.mean(rpe_g))
+    print("STD of distance between " + source1 + " and " + source2 + " attitude estimations:")
+    print(np.std(rpe_g, ddof=1))                                        # ddof = 1 for unbiased std
     print("Relative Pose Error of vector g")
     plot(rpe_g)
     print("Last RPE between " + source1 + " and " + source2 + " vector g estimations:")
     print(rpe_g[-1])
+    print("RMSE of RPE between " + source1 + " and " + source2 + " vector g estimations:")
+    print(utils.RMSE(rpe_g))
+
     return madgwick_distance, d_g, rpe, rpe_g
 
 def ciplot(t, mu, minus_sigma, plus_sigma, x_real, color=None):

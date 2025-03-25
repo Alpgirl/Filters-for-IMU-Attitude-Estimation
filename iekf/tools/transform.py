@@ -144,7 +144,9 @@ def quats_to_rpy(quats):
     '''
     Transforming quaternions [w, x, y, z] to roll pitch yaw angles
 
-    Return: array of [roll, pitch, yaw]
+    param: quats - array of quaternions [w, x, y, z]
+
+    return: array of [roll, pitch, yaw]
     '''
     #rpys = np.empty((len(quats), 3))
     #for i in range(len(quats)):
@@ -170,11 +172,9 @@ def rpy_to_quats(rpys):
     '''
     Transforming roll, pitch, yaw angles to quaternions [w, x, y, z]
     
-    Parameters:
-        rpys: Nx3 numpy array of [roll, pitch, yaw] angles in radians
+    param: rpys - Nx3 numpy array of [roll, pitch, yaw] angles in radians
 
-    Returns:
-        Nx4 numpy array of quaternions [w, x, y, z]
+    return: Nx4 numpy array of quaternions [w, x, y, z]
     '''
     # Create a Rotation object from RPY angles
     #rotations = R.from_euler('xyz', rpys)
