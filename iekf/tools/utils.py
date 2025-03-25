@@ -134,6 +134,85 @@ def RMSE(errors):
     '''
     return np.sqrt(np.mean(np.power(errors, 2), axis=0))
 
+def APE_RPY(rpys1, rpys2):
+    return np.abs(rpys1 - rpys2)
+
+def vectors_to_rpy(vec1, vec2):
+    '''
+    Compute roll, pitch, yaw angles (XYZ euler angles) between two unit vectors
+    
+    Parameters:
+        v1, v2: 3D unit vectors (numpy arrays)
+    
+    Returns:
+        Roll, Pitch, Yaw angles in radians (numpy array)
+    '''
+    # Ensure unit vectors
+    v1 = vec1.flatten() / np.linalg.norm(vec1)
+    v2 = vec2.flatten() / np.linalg.norm(vec2)
+
+    # Compute rotation axis and angle
+    axis = np.cross(v1, v2)
+    angle = np.arccos(np.clip(np.dot(v1, v2), -1.0, 1.0))  # Clip for numerical stability
+
+    if np.linalg.norm(axis) < 1e-6:  # If vectors are already aligned
+        return np.array([0.0, 0.0, 0.0])  # No rotation needed
+
+    axis = axis / np.linalg.norm(axis)  # Normalize axis
+
+    return axis * angle
+
+def APE_g_RPY(rpys1, rpys2):
+    R1 = np.array([mrob.SO3(rpy).R() for rpy in rpys1])
+    R2 = np.array([mrob.SO3(rpy).R() for rpy in rpys2])
+
+    g = np.array([0, 0, -1]).reshape(-1, 1)                      # looking just for direction of g
+    
+    g_in_1 = np.array([np.linalg.inv(R) @ g for R in R1])
+    g_in_2 = np.array([np.linalg.inv(R) @ g for R in R2])
+
+    rpys_g1_to_g2 = np.array([vectors_to_rpy(g_in_1[i], g_in_2[i]) for i in range(len(g_in_1))])
+
+    return np.abs(rpys_g1_to_g2)
+
+def RPE_RPY(rpys1, rpys2, increment=1):
+    '''
+    Relative Pose Error
+    It shows how different are increments in rpys1 from increments in rpys2
+
+    param: increment - number of steps between points in trajectory, which difference we are calculating
+    '''
+
+    change_in_1 = np.array([rpys1[i] - rpys1[i+increment] for i in range(len(rpys1)-increment)])
+    change_in_2 = np.array([rpys2[i] - rpys2[i+increment] for i in range(len(rpys2)-increment)])
+
+    rpe_rpys = np.array([change_in_1[i] / change_in_2[i] for i in range(len(change_in_1))])
+
+    return np.abs(rpe_rpys)
+
+def RPE_g_RPY(rpys1, rpys2, increment=1):
+    '''
+    Relative Pose Error
+    It shows how different are increments in rpys1 from increments in rpys2
+
+    param: increment - number of steps between points in trajectory, which difference we are calculating
+    '''
+
+    R1 = np.array([mrob.SO3(rpy).R() for rpy in rpys1])
+    R2 = np.array([mrob.SO3(rpy).R() for rpy in rpys2])
+
+    g = np.array([0, 0, -1]).reshape(-1, 1)                      # looking just for direction of g
+    
+    g_in_1 = np.array([np.linalg.inv(R) @ g for R in R1])
+    g_in_2 = np.array([np.linalg.inv(R) @ g for R in R2])
+
+    change_in_1 = np.array([vectors_to_rpy(g_in_1[i], g_in_1[i+increment]) for i in range(len(g_in_1)-increment)])
+    change_in_2 = np.array([vectors_to_rpy(g_in_2[i], g_in_2[i+increment]) for i in range(len(g_in_2)-increment)])
+
+    rp_g_rpys = np.array([change_in_1[i] / change_in_2[i] for i in range(len(change_in_1))])
+
+    return np.abs(rp_g_rpys)
+
 # DEPRECATED
 
 def normalize_quats(quats, w_id=0):
