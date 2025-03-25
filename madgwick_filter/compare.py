@@ -265,6 +265,10 @@ def compare_smartphone_to_mocap(smartphone_time, smartphone_quats, smartphone_gy
     plot(quat_sm_aligned, quat_mocap_aligned)
 
     errors_estimation(quat_sm_aligned, quat_mocap_aligned, source1, source2)
+
+    rpy_sm_aligned = transform.quats_to_rpy(quat_sm_aligned)
+    rpy_mocap_aligned = transform.quats_to_rpy(quat_mocap_aligned)
+    errors_estimation_rpy(rpy_sm_aligned, rpy_mocap_aligned, source1, source2)
     
     return time_sync, quat_sm_aligned, quat_mocap_aligned
 
@@ -295,6 +299,10 @@ def compare_smartphone_to_gamerotvec(sm_time, sm_gyros, sm_accs, sm_magns, grv_t
     plot(madgwick.Q, data_grv_quats)
 
     errors_estimation(madgwick.Q, data_grv_quats, source2="Game Rotation Vector")
+
+    rpy_sm_aligned = transform.quats_to_rpy(madgwick.Q)
+    rpy_mocap_aligned = transform.quats_to_rpy(data_grv_quats)
+    errors_estimation_rpy(rpy_sm_aligned, rpy_mocap_aligned, source2="Game Rotation Vector")
 
     return t_data_sync, madgwick, data_grv_quats
 
