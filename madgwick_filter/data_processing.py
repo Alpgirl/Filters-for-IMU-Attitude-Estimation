@@ -82,6 +82,54 @@ def import_combined_data(filename, smoothing=True):
 
     return data_t, data_gyr_xyz, data_acc_xyz, data_magn_xyz
 
+def import_tum_imu(filename, smoothing=True):
+    '''
+    Imports and smooths (savgol, cubic spline) data
+    Importing t, 
+    ang_vel, acc,
+    data from 1, 2, 3, 4, ... columns of the .csv file 
+
+    return: data_t - array of timestamps
+            data_gyr_xyz - array of x, y, z angular velocities for each timestamp 
+            data_acc_xyz - array of x, y, z accelerations for each timestamp 
+    '''
+    data_np = pd.read_csv(filename, header=1).to_numpy()
+    data_t = data_np[:, 0] / 1e9                            # nanoseconds
+    data_gyr_xyz = np.empty((len(data_t), 3))
+    data_acc_xyz = np.empty((len(data_t), 3))
+    data_gyr_xyz = data_np[:, 1:4]
+    data_acc_xyz = data_np[:, 4:7]
+
+    if smoothing:
+        data_gyr_xyz = smooth_and_resample_imu(data_t, data_t, data_gyr_xyz)
+        data_acc_xyz = smooth_and_resample_imu(data_t, data_t, data_acc_xyz)
+
+    return data_t, data_gyr_xyz, data_acc_xyz
+
+def import_tum_mocap(filename, smoothing=True):
+    '''
+    Importing and smoothing (savgol, SLERP) mocap data from .csv file with order: 
+    time, translation, rotation quaternion [w, x, y, z]
+
+    return: data_quat_t, data_quat_R [w, x, y, z], data_quat_T
+    '''
+    data_quat_np = pd.read_csv(filename, header=1).dropna().to_numpy()
+    data_quat_t = data_quat_np[:, 0].astype(np.float64) / 1e9                           # nanoseconds
+    data_quat_R = np.empty((len(data_quat_t), 4))
+    data_quat_T = np.empty((len(data_quat_t), 3))
+    data_quat_T[:, 0] = data_quat_np[:, 1]
+    data_quat_T[:, 1] = data_quat_np[:, 2]
+    data_quat_T[:, 2] = data_quat_np[:, 3]
+    data_quat_R[:, 0] = data_quat_np[:, 4]
+    data_quat_R[:, 1] = data_quat_np[:, 5]
+    data_quat_R[:, 2] = data_quat_np[:, 6]
+    data_quat_R[:, 3] = data_quat_np[:, 7]
+
+    if smoothing:
+        data_quat_R = smooth_and_resample_quats(data_quat_t, data_quat_t, data_quat_R)
+
+    return data_quat_t, data_quat_R, data_quat_T
+
 def interpolate_data(t_goal, t1, t2, data1, data2):
     '''
     Interpolating data between t1 and t2 to t_goal

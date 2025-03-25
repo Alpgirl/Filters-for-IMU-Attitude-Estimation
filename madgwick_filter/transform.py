@@ -140,6 +140,38 @@ def dxs_to_xs(timestamps, dxs, x0):
 
     return xs
 
+def quats_to_rpy(quats):
+    '''
+    Transforming quaternions [w, x, y, z] to roll pitch yaw angles
+
+    param: quats - array of quaternions [w, x, y, z]
+
+    return: array of [roll, pitch, yaw]
+    '''
+    # [w x y z] to [x y z w]
+    quats = np.roll(quats, -1, axis=1)
+
+    R1 = np.array([mrob.quat_to_so3(quats[i]) for i in range(len(quats))])
+
+    teta = np.array([mrob.SO3.Ln(mrob.SO3(R1[i])) for i in range(len(R1))])
+    
+    return teta
+
+def rpy_to_quats(rpys):
+    '''
+    Transforming roll, pitch, yaw angles to quaternions [w, x, y, z]
+    
+    param: rpys - Nx3 numpy array of [roll, pitch, yaw] angles in radians
+
+    return: Nx4 numpy array of quaternions [w, x, y, z]
+    '''
+    R = np.array([mrob.SO3(rpys[i]).R() for i in range(len(rpys))])
+
+    quats = np.array([mrob.so3_to_quat(R[i]) for i in range(len(R))])
+    quaternions = (np.roll(quats, 1, axis=1))      # transforming [x, y, z, w] -> [w, x, y, z] 
+    
+    return quaternions
+
 # DEPRECATED
 
 def data_to_wider_times(t_data, data, wider_times):

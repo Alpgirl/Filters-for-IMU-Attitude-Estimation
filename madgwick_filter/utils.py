@@ -3,9 +3,7 @@
 @file utils
 '''
 
-from madgwick_filter.tools_ahrs import plot
-from madgwick_filter.tools_ahrs import plot3
-import ahrs
+from tools.tools_ahrs import plot
 import mrob
 import numpy as np
 import matplotlib.pyplot as plt
@@ -33,21 +31,15 @@ def calculate_quat_distances(quaternions1, quaternions2):
 
     return distance
 
-def normalize_quats(quats, w_id=0):
-    signs = np.sign(quats[:, w_id])+(np.sign(quats[:, w_id])==0)                      # To multipy negative ones by -1, and zeros by 1 (other terms not 0)
-    quats = quats * signs.reshape(-1, 1)
-    return quats
-
-def quaternion_multiply(quaternion1, quaternion0):
+def angle_rot(vec1, vec2):
     '''
-    Just quatenions multiplication formula
+    Calculate single angle of rotation between two 3D vectors
     '''
-    w0, x0, y0, z0 = quaternion0
-    w1, x1, y1, z1 = quaternion1
-    return np.array([-x1 * x0 - y1 * y0 - z1 * z0 + w1 * w0,
-                     x1 * w0 + y1 * z0 - z1 * y0 + w1 * x0,
-                     -x1 * z0 + y1 * w0 + z1 * x0 + w1 * y0,
-                     x1 * y0 - y1 * x0 + z1 * w0 + w1 * z0], dtype=np.float64)
+    dot_product = np.dot(vec1.flatten(), vec2.flatten())
+    cross_product = np.cross(vec1.flatten(), vec2.flatten())
+    sin_theta = np.linalg.norm(cross_product)
+    cos_theta = dot_product
+    return np.arctan2(sin_theta, cos_theta)
 
 def calculate_g_distances(quaternions1, quaternions2):
     '''
@@ -74,10 +66,7 @@ def calculate_g_distances(quaternions1, quaternions2):
     print("Difference between G vectors in smartphone and (mocap-observed-smartphone) reference frames")
     plot(g_in_1.reshape(-1, 3) - g_in_2.reshape(-1, 3))
 
-    g_in_1_SE3 = np.array([mrob.SE3(mrob.SO3(), g_in_1_i) for g_in_1_i in g_in_1])
-    g_in_2_SE3 = np.array([mrob.SE3(mrob.SO3(), g_in_1_2) for g_in_1_2 in g_in_2])
-
-    distance = np.array([mrob.SE3.distance_trans(g_in_1_SE3[i], g_in_2_SE3[i]) for i in range(len(g_in_1_SE3))])
+    distance = np.array([angle_rot(g_in_1[i], g_in_2[i]) for i in range(len(g_in_1))])
 
     return distance
 
@@ -129,99 +118,52 @@ def RPE_g(quaternions1, quaternions2, increment=1):
     
     return distance
 
+def calc_cov(noised, ground_truth):
+    '''
+    Calculating noise covariance of noised data
+    Given that noised = ground_truth + noise, noise cov is:
+    E{(noise)*(noise).T}
+    '''
+    noise = noised - ground_truth
+    return np.cov(noise.T)
 
-
-
+    
+def RMSE(errors):
+    '''
+    Calculate Root Mean Squared of the given errors array
+    '''
+    return np.sqrt(np.mean(np.power(errors, 2), axis=0))
 
 # DEPRECATED
 
-def sum_between_timestamps(timestamps_data, data, timestamps_goal):
+def normalize_quats(quats, w_id=0):
+    signs = np.sign(quats[:, w_id])+(np.sign(quats[:, w_id])==0)                      # To multipy negative ones by -1, and zeros by 1 (other terms not 0)
+    quats = quats * signs.reshape(-1, 1)
+    return quats
+
+def quaternion_multiply(quaternion1, quaternion0):
     '''
-    DEPRECATED
-    Summing all measurements between all neighboring pairs of timestamps_goal
-
-    return: sums array
+    Just quatenions multiplication formula
     '''
-    data_goal = np.empty((len(timestamps_goal), data.shape[1]))
-    t_goal_cur = 0
-    sum_cur = 0
+    w0, x0, y0, z0 = quaternion0
+    w1, x1, y1, z1 = quaternion1
+    return np.array([-x1 * x0 - y1 * y0 - z1 * z0 + w1 * w0,
+                     x1 * w0 + y1 * z0 - z1 * y0 + w1 * x0,
+                     -x1 * z0 + y1 * w0 + z1 * x0 + w1 * y0,
+                     x1 * y0 - y1 * x0 + z1 * w0 + w1 * z0], dtype=np.float64)
 
-    for i in range(len(timestamps_data)):
-        sum_cur += data[i]
-        if(timestamps_data[i] >= timestamps_goal[t_goal_cur]):
-            data_goal[t_goal_cur] = sum_cur
-            t_goal_cur += 1
-            sum_cur = 0
-
-    return data_goal
-
-def difference_between_timestamps(timestamps_data, data, timestamps_goal):
+def RPE_angvels(angvels1, angvels2, increment=1):
     '''
-    Calculating differences of data between all neighboring pairs of timestamps_goal
+    Relative Pose Error
+    It shows how different are increments in angvels1 from increments in angvels2
 
-    return: array of data_future - data_past (like integral of change)
+    param: increment - number of steps between points in trajectory, which difference we are calculating
     '''
-    data_goal = np.empty((len(timestamps_goal), data.shape[1]))
-    t_goal_cur = 0
-    i_start = 0
 
-    for i in range(len(timestamps_data)):
-        if(timestamps_data[i] >= timestamps_goal[t_goal_cur]):
-            data_goal[t_goal_cur] = data[i] - data[i_start]
-            t_goal_cur += 1
-            i_start = i+1
+    change_in_1 = np.array([angvels1[i] - angvels1[i+increment] for i in range(len(angvels1)-increment)])
+    change_in_2 = np.array([angvels2[i] - angvels2[i+increment] for i in range(len(angvels2)-increment)])
 
-    return data_goal
+    distance = np.array([change_in_1[i] / change_in_2[i] for i in range(len(change_in_1))])
 
-def generate_filter_from_q0(q_init, data_gyr, data_acc, freq, data_magn=None):
-    '''
-    Generates madgwick filter with initial quaternion = q_init
-    If data_magn is provided, generates MARG filter
-    If not, generates IMU filter
+    return distance
 
-    return: madgwick filter object
-    '''
-    madgwick_iterative = ahrs.filters.Madgwick(q0=q_init)
-    Quaternions = [q_init]    # Allocate first quaternion in an array
-
-    for index in range(1, len(data_gyr)+1):
-        if(data_magn==None):
-            new_quaternion = madgwick_iterative.updateIMU(q=Quaternions[index-1],
-                                                gyr=data_gyr[index-1],
-                                                acc=data_acc[index-1],
-                                                dt=1/freq)   
-        else:
-            new_quaternion = madgwick_iterative.updateMARG(q=Quaternions[index-1],
-                                                gyr=data_gyr[index-1],
-                                                acc=data_acc[index-1],
-                                                magn=data_magn[index-1],
-                                                dt=1/freq)  
-        Quaternions.append(new_quaternion)
-
-    Quaternions = ahrs.QuaternionArray(Quaternions)
-    madgwick_iterative.Q = Quaternions
-
-    return madgwick_iterative
-
-def RPRE(quaternions1, quaternions2):
-    '''
-    Root Product Relative Error
-    '''
-    R1 = np.array([mrob.quat_to_so3(quat) for quat in np.roll(quaternions1, -1, axis=1)])
-    R2 = np.array([mrob.quat_to_so3(quat) for quat in np.roll(quaternions2, -1, axis=1)])
-
-    g = np.array([0, 0, -1]).reshape(-1, 1)                       # looking just for direction of g
-
-    g_in_1 = np.array([np.linalg.inv(R) @ g for R in R1])
-    g_in_2 = np.array([np.linalg.inv(R) @ g for R in R2])
-    
-    g_in_1_SE3 = np.array([mrob.SE3(mrob.SO3(), g_in_1_i) for g_in_1_i in g_in_1])
-    g_in_2_SE3 = np.array([mrob.SE3(mrob.SO3(), g_in_1_2) for g_in_1_2 in g_in_2])
-
-    d12 = np.array([mrob.SE3.distance_trans(g_in_1_SE3[i], g_in_2_SE3[i]) for i in range(len(g_in_1_SE3))])
-    d1 = np.array([mrob.SE3.distance_trans(g_in_1_SE3[0], g_in_1_SE3[i]) for i in range(len(g_in_1_SE3))])
-    d2 = np.array([mrob.SE3.distance_trans(g_in_2_SE3[0], g_in_2_SE3[i]) for i in range(len(g_in_2_SE3))])
-
-    rrse = np.array([d12[i] / np.sqrt(d1[i]*d2[i]) for i in range(1, len(d12))])
-
-    return rrse
