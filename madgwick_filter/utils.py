@@ -3,7 +3,7 @@
 @file utils
 '''
 
-from tools.tools_ahrs import plot
+from madgwick_filter.tools_ahrs import plot
 import mrob
 import numpy as np
 import matplotlib.pyplot as plt
