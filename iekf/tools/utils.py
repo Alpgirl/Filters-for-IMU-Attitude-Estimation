@@ -135,17 +135,18 @@ def RMSE(errors):
     return np.sqrt(np.mean(np.power(errors, 2), axis=0))
 
 def APE_RPY(rpys1, rpys2):
+    '''
+    Absolute Pose Error of roll pitch yaw angles
+    '''
     return np.abs(rpys1 - rpys2)
 
 def vectors_to_rpy(vec1, vec2):
     '''
     Compute roll, pitch, yaw angles (XYZ euler angles) between two unit vectors
     
-    Parameters:
-        v1, v2: 3D unit vectors (numpy arrays)
+    param: vec1, vec2 - 3D unit vectors (numpy arrays)
     
-    Returns:
-        Roll, Pitch, Yaw angles in radians (numpy array)
+    return: Roll, Pitch, Yaw angles in radians (numpy array)
     '''
     # Ensure unit vectors
     v1 = vec1.flatten() / np.linalg.norm(vec1)
@@ -163,6 +164,9 @@ def vectors_to_rpy(vec1, vec2):
     return axis * angle
 
 def APE_g_RPY(rpys1, rpys2):
+    '''
+    Absolute Pose Error of gravity vector estimations in terms of roll pitch yaw angles
+    '''
     R1 = np.array([mrob.SO3(rpy).R() for rpy in rpys1])
     R2 = np.array([mrob.SO3(rpy).R() for rpy in rpys2])
 
@@ -177,7 +181,7 @@ def APE_g_RPY(rpys1, rpys2):
 
 def RPE_RPY(rpys1, rpys2, increment=1):
     '''
-    Relative Pose Error
+    Relative Pose Error of roll pitch yaw angles
     It shows how different are increments in rpys1 from increments in rpys2
 
     param: increment - number of steps between points in trajectory, which difference we are calculating
@@ -192,8 +196,8 @@ def RPE_RPY(rpys1, rpys2, increment=1):
 
 def RPE_g_RPY(rpys1, rpys2, increment=1):
     '''
-    Relative Pose Error
-    It shows how different are increments in rpys1 from increments in rpys2
+    Relative Pose Error of gravity vector estimations in terms of roll pitch yaw angles
+    It shows how different are increments of gravity vector in rpys1 from increments in rpys2
 
     param: increment - number of steps between points in trajectory, which difference we are calculating
     '''

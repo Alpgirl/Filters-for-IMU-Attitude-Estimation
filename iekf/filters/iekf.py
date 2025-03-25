@@ -8,16 +8,39 @@ import mrob
 from filters.localization_filter import LocalizationFilter
 
 def Exp(vec):
+    '''
+    Matrix exponent from Lie algebra: R3 -> SO3
+
+    param: vec - [fi_x, fi_y, fi_z] vector
+
+    return: mrob.SO3 object
+    '''
     return mrob.geometry.SO3(vec)
 
 
 class IEKF(LocalizationFilter):
+    '''
+    Left-Invariant EKF 
+    '''
     def V_t(self, dt):
+        '''
+        Motion jacobian 
+
+        We propagate motion as d_R = w*dt, so it's just d_t
+        '''
 
         V = np.eye(self.motion_dim) * dt
         return V
     
     def H_t(self, a):
+        '''
+        Observation jacobian 
+
+        We observe deviation of acceleration vector from gravity vector
+        h(t) = R_t @ a - g
+
+        So we build Jacobian out of Lie generators
+        '''
         state = self.mu_bar
         assert isinstance(state, np.ndarray)
         assert isinstance(a, np.ndarray)
@@ -45,6 +68,13 @@ class IEKF(LocalizationFilter):
         return H
 
     def predict(self, u, dt):
+        '''
+        Propagate state with action u during dt
+
+        if bias self.b is set, we substract this bias from u
+
+        u_unbiased = u - bias
+        '''
         d_R = Exp(u*dt)
         u_unbias = u - self.b
         d_R_unbias = Exp(u_unbias*dt)
@@ -60,6 +90,9 @@ class IEKF(LocalizationFilter):
         self._state_bar.Sigma = Sigma_bar
 
     def update(self, a):
+        '''
+        Update state with observation of acceleration vector a
+        '''
         Q = self.Q
         H = self.H_t(a)
         K = self.Sigma_bar @ H.T @ np.linalg.inv(H @ self.Sigma_bar @ H.T + Q)
@@ -67,13 +100,16 @@ class IEKF(LocalizationFilter):
         R_bar = Exp(self.mu_bar)
         innocation_vec = R_bar.R() @ a - self.g
         R = Exp(K @ innocation_vec).mul(R_bar)
-        
+
         self._state.mu = R.Ln().reshape(-1, 1)
         self._state.Sigma = (np.eye(self.state_dim) - K @ H) @ self.Sigma_bar
 
         return K, innocation_vec
 
     def update_fake(self):
+        '''
+        Update state without observation - simply keep propagating
+        '''
         R_bar = Exp(self.mu_bar)
         self._state.mu = R_bar.Ln().reshape(-1, 1)
         self._state.Sigma = self.Sigma_bar

@@ -41,11 +41,13 @@ class LocalizationFilter(ABC):
         self._state = copy.deepcopy(initial_state)
         self._state_bar = copy.deepcopy(initial_state)
 
-        # Filter noise parameters.
+        # Motion noise variance
         self.M = M
-        # Measurement variance.
+        # Measurement noise variance
         self.Q = Q
+        # gravity vector, usually [0, 0, -9.81]
         self.g = g
+        # Motion bias, to be substracted from each motion
         self.b = b
 
     @abstractmethod
