@@ -7,6 +7,7 @@ import mrob
 import ahrs
 
 from filters.localization_filter import LocalizationFilter
+from tools.objects import Gaussian
 
 def Exp(vec):
     return mrob.geometry.SO3(vec)
@@ -89,3 +90,69 @@ class IEKF(LocalizationFilter):
         R_bar = Exp(self.mu_bar)
         self._state.mu = R_bar.Ln().reshape(-1, 1)
         self._state.Sigma = self.Sigma_bar
+
+
+
+
+class ParticleFilter(LocalizationFilter):
+    def __init__(self, initial_state, M, Q, g, b, num_particles=100):
+        super().__init__(initial_state, M, Q, g, b)
+        self.num_particles = num_particles
+
+        
+        self.particles = np.random.multivariate_normal(
+            mean=initial_state.mu.T[0],
+            cov=initial_state.Sigma,
+            size=num_particles
+        )
+        self.weights = np.ones(num_particles) / num_particles
+
+    def predict(self, u, dt):
+       
+        noise = np.random.multivariate_normal(np.zeros(3), self.M, self.num_particles)
+        self.particles += (u - self.b) * dt + noise
+
+        # Save prior estimate
+        mu = np.average(self.particles, axis=0, weights=self.weights)
+        Sigma = np.cov(self.particles.T, aweights=self.weights)
+        self._state_bar.mu = mu[np.newaxis].T
+        self._state_bar.Sigma = Sigma
+
+    def update(self, z):
+        
+        for i in range(self.num_particles):
+            expected = self._expected_measurement(self.particles[i])
+            innovation = z - expected
+            self.weights[i] *= self._gaussian_likelihood(innovation, self.Q)
+
+        self.weights += 1e-300  
+        self.weights /= np.sum(self.weights)
+
+        self._resample()
+        self._update_estimate()
+
+        
+
+    def _expected_measurement(self, state):
+        return self.g + self.b
+
+    def _gaussian_likelihood(self, error, cov):
+        k = len(error)
+        cov_det = np.linalg.det(cov)
+        cov_inv = np.linalg.inv(cov)
+        norm_const = 1.0 / (np.power((2 * np.pi), k / 2) * np.sqrt(cov_det))
+        return norm_const * np.exp(-0.5 * error.T @ cov_inv @ error)
+
+    def _resample(self):
+        Neff = 1.0 / np.sum(self.weights**2)
+        if Neff < self.num_particles / 2:
+            indices = np.random.choice(self.num_particles, self.num_particles, p=self.weights)
+            self.particles = self.particles[indices]
+            self.weights = np.ones(self.num_particles) / self.num_particles
+
+    def _update_estimate(self):
+        mu = np.average(self.particles, axis=0, weights=self.weights)
+        Sigma = np.cov(self.particles.T, aweights=self.weights)
+        self._state.mu = mu[np.newaxis].T
+        self._state.Sigma = Sigma
+        self._state_bar = Gaussian(self._state.mu, self._state.Sigma) 
