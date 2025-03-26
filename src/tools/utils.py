@@ -270,4 +270,3 @@ def RPE_angvels(angvels1, angvels2, increment=1):
     distance = np.array([change_in_1[i] / change_in_2[i] for i in range(len(change_in_1))])
 
     return distance
-
