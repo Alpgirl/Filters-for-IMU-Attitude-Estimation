@@ -1,0 +1,3 @@
+ps_s001_003 Proximity Sensor Wakeup,ams AG,2025-03-06_19-02-36.207_TGW
+imuTimestamp,accuracy(more=better),proximity_distance[cm]
+802485793,3,5.0,727.0,727.0

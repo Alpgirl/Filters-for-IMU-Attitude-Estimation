@@ -1,0 +1,26 @@
+ANDROID_ID:6fb0486f42ddc803
+AndroidApiLevel:31
+AppVersion:1.9.2_Sk1.0
+BluetoothAddress:null
+DeviceName:HUAWEI, ALT-L29, ALT-L29
+FolderName:/storage/emulated/0/Oblulog/2025-03-06_18-41-53.764_TGW/
+IMEI:null
+ImuLeftAddress:
+ImuRightAddress:
+Label:2025-03-06_18-41-53.764_TGW
+Logformat:oblulog-1.0
+LoggersStopRealtime:801349088
+LogStartedBy:Master
+MasterSendStartRealtime:801242967
+MasterStartDate:2025-03-06_18-41-53.764
+Note:
+Placement:
+Realtime:801243005
+Sensorset:[INERTIAL, LOCATION, OTHER, VIRTUAL, SECOND_IMU]
+SensorUpdateRate:100Hz
+SlavesAddresses:[]
+StopRealtime:801348897
+Subject:walking_talking
+TimestampCorrectionMillis:-801242967
+Uptime:149756493
+UTC:1741275716833

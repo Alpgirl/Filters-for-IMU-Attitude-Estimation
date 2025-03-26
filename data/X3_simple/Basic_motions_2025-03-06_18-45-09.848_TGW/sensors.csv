@@ -1,0 +1,39 @@
+Index,Name,Type,Vendor,Version,MinDelay,Resolution,MaxRange,Power
+1,acc_s001_004 Accelerometer Non-wakeup,1,STMicro,142907,2404,0.0023928226,78.4532,0.17
+5,mag_s004_001 Magnetometer Non-wakeup,2,QST,4098,10000,0.1,3000.0,1.1
+3,gyro_s001_004 Gyroscope Non-wakeup,4,STMicro,142907,2404,0.0012217296,34.906036,0.55
+9,als_s001_003 Ambient Light Sensor Non-wakeup,5,ams AG,66048,5000,1.0,20000.0,0.38
+10,baro_s002_001 Pressure Sensor Non-wakeup,6,Goertek,9216,31250,6.0E-4,1099.9999,0.011
+-1,ps_s001_003 Proximity Sensor Non-wakeup,8,ams AG,66048,10000,1.0,5.0,0.625
+11,ps_s001_003 Proximity Sensor Wakeup,8,ams AG,66048,10000,1.0,5.0,0.625
+14,gravity  Non-wakeup,9,QTI,1,5000,0.01,156.91,0.515
+15,linear_acceleration,10,QTI,1,5000,0.01,156.91,0.515
+16,Rotation Vector  Non-wakeup,11,QTI,1,5000,0.01,1.0,1.415
+6,mag_s004_001 Magnetometer-Uncalibrated Non-wakeup,14,QST,4098,10000,0.1,3000.0,1.1
+12,Game Rotation Vector  Non-wakeup,15,QTI,1,5000,0.01,1.0,0.515
+4,gyro_s001_004 Gyroscope-Uncalibrated Non-wakeup,16,STMicro,142907,2404,0.0012217296,34.906036,0.55
+17,sns_smd  Wakeup,17,QTI,1,-1,1.0,1.0,0.025
+19,pedometer  Non-wakeup,18,huawei,1,0,1.0,1.0,0.001
+18,pedometer  Non-wakeup,19,huawei,1,10000,1.0,4.2949673E9,0.001
+13,sns_geomag_rv  Non-wakeup,20,QTI,1,10000,0.01,1.0,1.05
+-1,sns_tilt  Wakeup,22,QTI,1,0,1.0,1.0,0.025
+-1,Device Orientation  Non-wakeup,27,QTI,1,0,1.0,1.0,0.025
+-1,stationary_detect,29,QTI,1,-1,1.0,1.0,0.025
+-1,motion_detect,30,QTI,1,-1,1.0,1.0,0.025
+2,acc_s001_004 Accelerometer-Uncalibrated Non-wakeup,35,STMicro,142907,2404,0.0023928226,78.4532,0.17
+-1,sar_s001_001_0 SAR Sensor Non-wakeup,65541,Semtech,12288,10000,0.01,1.0,0.022
+-1,drop drop Sensor Non-wakeup,65556,huawei,1,10000,0.01,1.0,0.001
+-1,drop drop Sensor Wakeup,65556,huawei,1,10000,0.01,1.0,0.001
+20,acc_s003_002 QTI-Accelerometer Non-wakeup,65558,TDK-Invensense,265,2500,0.0047884034,156.9064,0.24
+21,gyro_s003_002 QTI-Gyroscope Non-wakeup,65559,TDK-Invensense,265,2500,0.0010652636,34.90656,0.57
+-1,als_s001_002 QTI Ambient Light Sensor Non-wakeup,65568,ams AG,256,500,0.01,1.0,0.09
+-1,posture Posture Sensor Non-wakeup,65573,huawei,1,10000,0.01,1.0,0.001
+-1,VirtualAls VirtualAls Non-wakeup,65580,huawei,1,0,0.01,1.0,0.001
+-1,VirtualAls VirtualAls Wakeup,65580,huawei,1,0,0.01,1.0,0.001
+-1,VirtualProx VirtualProx Non-wakeup,65581,huawei,1,0,0.01,1.0,0.001
+-1,VirtualProx VirtualProx Wakeup,65581,huawei,1,0,0.01,1.0,0.001
+23,gyro_s003_002 QTI-Gyroscope-Uncalibrated Non-wakeup,268369936,TDK-Invensense,265,2500,0.0010652636,34.90656,0.57
+22,acc_s003_002 QTI-Accelerometer-Uncalibrated Non-wakeup,268369955,TDK-Invensense,265,2500,0.0047884034,156.9064,0.24
+-1,Hw Hall Effect Sensor Non-wakeup,65538,Hw ,1,0,1.0,1.0,0.001
+-1,Hw Ap Sensor,65554,Hw ,1,0,0.01,1.0,0.001
+-1,Hw Ext_Hall Effect Sensor Non-wakeup,65557,Hw ,1,0,1.0,1.0,0.001

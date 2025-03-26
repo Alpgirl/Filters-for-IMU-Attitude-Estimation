@@ -1,0 +1,26 @@
+ANDROID_ID:6fb0486f42ddc803
+AndroidApiLevel:31
+AppVersion:1.9.2_Sk1.0
+BluetoothAddress:null
+DeviceName:HUAWEI, ALT-L29, ALT-L29
+FolderName:/storage/emulated/0/Oblulog/2025-03-06_19-02-36.207_TGW/
+IMEI:null
+ImuLeftAddress:
+ImuRightAddress:
+Label:2025-03-06_19-02-36.207_TGW
+Logformat:oblulog-1.0
+LoggersStopRealtime:802675274
+LogStartedBy:Master
+MasterSendStartRealtime:802485417
+MasterStartDate:2025-03-06_19-02-36.207
+Note:
+Placement:
+Realtime:802485462
+Sensorset:[INERTIAL, LOCATION, OTHER, VIRTUAL, SECOND_IMU]
+SensorUpdateRate:100Hz
+SlavesAddresses:[]
+StopRealtime:802675002
+Subject:random_walk
+TimestampCorrectionMillis:-802485417
+Uptime:150998950
+UTC:1741276959290
