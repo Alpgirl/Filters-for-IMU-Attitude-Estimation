@@ -51,15 +51,18 @@ def errors_estimation(quaternions1, quaternions2, source1="smartphone", source2=
     # Checking if rotation quaternions align
     madgwick_distance = utils.calculate_quat_distances(quaternions1, quaternions2)
     print("Mean distance between " + source1 + " and " + source2 + " attitude estimations:")
-    print(np.mean(madgwick_distance))
+    madgwick_distance_mean = np.mean(madgwick_distance)
+    print(madgwick_distance_mean)
     print("STD of distance between " + source1 + " and " + source2 + " attitude estimations:")
-    print(np.std(madgwick_distance, ddof=1))                                        # ddof = 1 for unbiased std
+    madgwick_distance_std = np.std(madgwick_distance, ddof=1)
+    print(madgwick_distance_std)                                        # ddof = 1 for unbiased std
     print("Distance between " + source1 + " and " + source2 + " attitude estimations:")
     plot(madgwick_distance)
     print("Last distance between " + source1 + " and " + source2 + " attitude estimations:")
     print(madgwick_distance[-1])
     print("RMSE of APE between " + source1 + " and " + source2 + " attitude estimations:")
-    print(utils.RMSE(madgwick_distance))
+    madgwick_distance_rmse = utils.RMSE(madgwick_distance)
+    print(madgwick_distance_rmse)
     print("\n")
     #print("Norm of quaternions - shall be = 1")
     #print(np.linalg.norm(quaternions2, axis=1))
@@ -68,44 +71,59 @@ def errors_estimation(quaternions1, quaternions2, source1="smartphone", source2=
     # Checking if gravity vector, rotated by quaternions, align
     d_g = utils.calculate_g_distances(quaternions1, quaternions2)
     print("Mean distance between " + source1 + " and " + source2 + " vector g estimations:")
-    print(np.mean(d_g))
+    d_g_mean = np.mean(d_g)
+    print(d_g_mean)
     print("STD of distance between " + source1 + " and " + source2 + " vector g estimations:")
-    print(np.std(d_g, ddof=1))                                        # ddof = 1 for unbiased std
+    d_g_std = np.std(d_g, ddof=1)
+    print(d_g_std)                                        # ddof = 1 for unbiased std
     print("Distance between " + source1 + " and " + source2 + " vector g estimations:")
     plot(d_g)
     print("Last distance between " + source1 + " and " + source2 + " vector g estimations:")
     print(d_g[-1])
     print("RMSE of APE between " + source1 + " and " + source2 + " vector g estimations:")
-    print(utils.RMSE(d_g))
+    d_g_rmse = utils.RMSE(d_g)
+    print(d_g_rmse)
     print("\n")
 
     print("Mean Relative Pose Error")
     rpe = utils.RPE(quaternions1, quaternions2)
-    print(np.mean(rpe))
+    print("Mean distance between " + source1 + " and " + source2 + " attitude estimations:")
+    rpe_mean = np.mean(rpe)
+    print(rpe_mean)
     print("STD of distance between " + source1 + " and " + source2 + " attitude estimations:")
-    print(np.std(rpe, ddof=1))                                        # ddof = 1 for unbiased std
+    rpe_std = np.std(rpe, ddof=1)
+    print(rpe_std)                                        # ddof = 1 for unbiased std
     print("Relative Pose Error")
     plot(rpe)
     print("Last RPE between " + source1 + " and " + source2 + " attitude estimations:")
     print(rpe[-1])
     print("RMSE of RPE between " + source1 + " and " + source2 + " attitude estimations:")
-    print(utils.RMSE(rpe))
+    rpe_rmse = utils.RMSE(rpe)
+    print(rpe_rmse)
     print("\n")
 
     print("Mean Relative Pose Error of vector g")
     rpe_g = utils.RPE_g(quaternions1, quaternions2)
-    print(np.mean(rpe_g))
+    print("Mean distance between " + source1 + " and " + source2 + " vector g estimations:")
+    rpe_g_mean = np.mean(rpe_g)
+    print(rpe_g_mean)
     print("STD of distance between " + source1 + " and " + source2 + " vector g estimations:")
-    print(np.std(rpe_g, ddof=1))                                        # ddof = 1 for unbiased std
+    rpe_g_std = np.std(rpe_g, ddof=1)
+    print(rpe_g_std)                                        # ddof = 1 for unbiased std
     print("Relative Pose Error of vector g")
     plot(rpe_g)
     print("Last RPE between " + source1 + " and " + source2 + " vector g estimations:")
     print(rpe_g[-1])
     print("RMSE of RPE between " + source1 + " and " + source2 + " vector g estimations:")
-    print(utils.RMSE(rpe_g))
+    rpe_g_rmse = utils.RMSE(rpe_g)
+    print(rpe_g_rmse)
     print("\n")
 
-    return madgwick_distance, d_g, rpe, rpe_g
+    return (madgwick_distance_mean, madgwick_distance_std, madgwick_distance_rmse, 
+            d_g_mean, d_g_std, d_g_rmse, 
+            rpe_mean, rpe_std, rpe_rmse, 
+            rpe_g_mean, rpe_g_std, rpe_g_rmse
+    )
 
 def errors_estimation_rpy(rpys1, rpys2, source1="smartphone", source2="mocap"):
     '''
@@ -113,16 +131,21 @@ def errors_estimation_rpy(rpys1, rpys2, source1="smartphone", source2="mocap"):
     '''
     # Checking if rotation quaternions align
     ape = utils.APE_RPY(rpys1, rpys2)
+    ape_signed = utils.APE_RPY(rpys1, rpys2, abs=False)         # for STD
     print("Mean distance between " + source1 + " and " + source2 + " RPY attitude estimations:")
-    print(np.mean(ape, axis=0))
+    ape_mean = np.mean(ape, axis=0)
+    print(ape_mean)
     print("STD of distance between " + source1 + " and " + source2 + " RPY attitude estimations:")
-    print(np.std(ape, ddof=1, axis=0))                                        # ddof = 1 for unbiased std
+    ape_std = np.std(ape_signed, ddof=1, axis=0)
+    print(ape_std)                                              # ddof = 1 for unbiased std
+                                                                # we use ape_signed because we need mean of error, not it's abs
     print("Distance between " + source1 + " and " + source2 + " RPY attitude estimations:")
     plot(ape)
     print("Last distance between " + source1 + " and " + source2 + " RPY attitude estimations:")
     print(ape[-1, :])
     print("RMSE of APE between " + source1 + " and " + source2 + " RPY attitude estimations:")
-    print(utils.RMSE(ape))
+    ape_rmse = utils.RMSE(ape)
+    print(ape_rmse)
     print("\n")
     #print("Norm of quaternions - shall be = 1")
     #print(np.linalg.norm(quaterniions2, axis=1))
@@ -130,45 +153,66 @@ def errors_estimation_rpy(rpys1, rpys2, source1="smartphone", source2="mocap"):
 
     # Checking if gravity vector, rotated by quaternions, align
     ape_g = utils.APE_g_RPY(rpys1, rpys2)
+    ape_g_signed = utils.APE_g_RPY(rpys1, rpys2, abs=False)     # for STD
     print("Mean distance between " + source1 + " and " + source2 + " RPY vector g estimations:")
-    print(np.mean(ape_g, axis=0))
+    ape_g_mean = np.mean(ape_g, axis=0)
+    print(ape_g_mean)
     print("STD of distance between " + source1 + " and " + source2 + " RPY vector g estimations:")
-    print(np.std(ape_g, ddof=1, axis=0))                                        # ddof = 1 for unbiased std
+    ape_g_std = np.std(ape_g_signed, ddof=1, axis=0)
+    print(ape_g_std)                                            # ddof = 1 for unbiased std
+                                                                # we use ape_signed because we need mean of error, not it's abs
     print("Distance between " + source1 + " and " + source2 + " RPY vector g estimations:")
     plot(ape_g)
     print("Last distance between " + source1 + " and " + source2 + " RPY vector g estimations:")
     print(ape_g[-1, :])
     print("RMSE of APE between " + source1 + " and " + source2 + " RPY vector g estimations:")
-    print(utils.RMSE(ape_g))
+    ape_g_rmse = utils.RMSE(ape_g)
+    print(ape_g_rmse)
     print("\n")
 
     print("Mean Relative Pose Error")
     rpe = utils.RPE_RPY(rpys1, rpys2)
-    print(np.mean(rpe, axis=0))
+    rpe_signed = utils.RPE_RPY(rpys1, rpys2, abs=False)         # for STD
+    print("Mean distance between " + source1 + " and " + source2 + " RPY attitude estimations:")
+    rpe_mean = np.mean(rpe, axis=0)
+    print(rpe_mean)
     print("STD of distance between " + source1 + " and " + source2 + " RPY attitude estimations:")
-    print(np.std(rpe, ddof=1, axis=0))                                        # ddof = 1 for unbiased std
+    rpe_std = np.std(rpe_signed, ddof=1, axis=0)
+    print(rpe_std)                                              # ddof = 1 for unbiased std
+                                                                # we use ape_signed because we need mean of error, not it's abs
     print("Relative Pose Error RPY")
     plot(rpe)
     print("Last RPE between " + source1 + " and " + source2 + " RPY attitude estimations:")
     print(rpe[-1, :])
     print("RMSE of RPE between " + source1 + " and " + source2 + " RPY attitude estimations:")
-    print(utils.RMSE(rpe))
+    rpe_rmse = utils.RMSE(rpe)
+    print(rpe_rmse)
     print("\n")
 
     print("Mean Relative Pose Error of vector g")
     rpe_g = utils.RPE_g_RPY(rpys1, rpys2)
-    print(np.mean(rpe_g, axis=0))
+    rpe_g_signed = utils.RPE_g_RPY(rpys1, rpys2, abs=False)     # for STD
+    print("Mean distance between " + source1 + " and " + source2 + " RPY vector g estimations:")
+    rpe_g_mean = np.mean(rpe_g, axis=0)
+    print(rpe_g_mean)
     print("STD of distance between " + source1 + " and " + source2 + " RPY vector g estimations:")
-    print(np.std(rpe_g, ddof=1, axis=0))                                        # ddof = 1 for unbiased std
+    rpe_g_std = np.std(rpe_g_signed, ddof=1, axis=0)
+    print(rpe_g_std)                                            # ddof = 1 for unbiased std
+                                                                # we use ape_signed because we need mean of error, not it's abs
     print("Relative Pose Error RPY of vector g")
     plot(rpe_g)
     print("Last RPE between " + source1 + " and " + source2 + " RPY vector g estimations:")
     print(rpe_g[-1, :])
     print("RMSE of RPE between " + source1 + " and " + source2 + " RPY vector g estimations:")
-    print(utils.RMSE(rpe_g))
+    rpe_g_rmse = utils.RMSE(rpe_g)
+    print(rpe_g_rmse)
     print("\n")
 
-    return ape, ape_g, rpe, rpe_g
+    return (ape_mean, ape_std, ape_rmse,
+            ape_g_mean, ape_g_std, ape_g_rmse,
+            rpe_mean, rpe_std, rpe_rmse,
+            rpe_g_mean, rpe_g_std, rpe_g_rmse
+            )
 
 def ciplot(t, mu, minus_sigma, plus_sigma, x_real, color=None):
     """

@@ -134,11 +134,17 @@ def RMSE(errors):
     '''
     return np.sqrt(np.mean(np.power(errors, 2), axis=0))
 
-def APE_RPY(rpys1, rpys2):
+def APE_RPY(rpys1, rpys2, abs=True):
     '''
     Absolute Pose Error of roll pitch yaw angles
+
+    param: abs - Return absolute values of errors or not. Default is yes
+    abs=False is useful for STD calculation, where we need mean(error), not mean(abs(error))
     '''
-    return np.abs(rpys1 - rpys2)
+    if abs:
+        return np.abs(rpys1 - rpys2)
+    else:
+        return rpys1 - rpys2
 
 def vectors_to_rpy(vec1, vec2):
     '''
@@ -163,9 +169,12 @@ def vectors_to_rpy(vec1, vec2):
 
     return axis * angle
 
-def APE_g_RPY(rpys1, rpys2):
+def APE_g_RPY(rpys1, rpys2, abs=True):
     '''
     Absolute Pose Error of gravity vector estimations in terms of roll pitch yaw angles
+
+    param: abs - Return absolute values of errors or not. Default is yes
+    abs=False is useful for STD calculation, where we need mean(error), not mean(abs(error))
     '''
     R1 = np.array([mrob.SO3(rpy).R() for rpy in rpys1])
     R2 = np.array([mrob.SO3(rpy).R() for rpy in rpys2])
@@ -177,14 +186,19 @@ def APE_g_RPY(rpys1, rpys2):
 
     rpys_g1_to_g2 = np.array([vectors_to_rpy(g_in_1[i], g_in_2[i]) for i in range(len(g_in_1))])
 
-    return np.abs(rpys_g1_to_g2)
+    if abs:
+        rpys_g1_to_g2 = np.abs(rpys_g1_to_g2)
+    return rpys_g1_to_g2
 
-def RPE_RPY(rpys1, rpys2, increment=1):
+def RPE_RPY(rpys1, rpys2, increment=1, abs=True):
     '''
     Relative Pose Error of roll pitch yaw angles
     It shows how different are increments in rpys1 from increments in rpys2
 
     param: increment - number of steps between points in trajectory, which difference we are calculating
+
+    param: abs - Return absolute values of errors or not. Default is yes
+    abs=False is useful for STD calculation, where we need mean(error), not mean(abs(error))
     '''
 
     change_in_1 = np.array([rpys1[i] - rpys1[i+increment] for i in range(len(rpys1)-increment)])
@@ -192,14 +206,19 @@ def RPE_RPY(rpys1, rpys2, increment=1):
 
     rpe_rpys = np.array([change_in_1[i] / change_in_2[i] for i in range(len(change_in_1))])
 
-    return np.abs(rpe_rpys)
+    if abs:
+        rpe_rpys = np.abs(rpe_rpys)
+    return rpe_rpys
 
-def RPE_g_RPY(rpys1, rpys2, increment=1):
+def RPE_g_RPY(rpys1, rpys2, increment=1, abs=True):
     '''
     Relative Pose Error of gravity vector estimations in terms of roll pitch yaw angles
     It shows how different are increments of gravity vector in rpys1 from increments in rpys2
 
     param: increment - number of steps between points in trajectory, which difference we are calculating
+
+    param: abs - Return absolute values of errors or not. Default is yes
+    abs=False is useful for STD calculation, where we need mean(error), not mean(abs(error))
     '''
 
     R1 = np.array([mrob.SO3(rpy).R() for rpy in rpys1])
@@ -215,7 +234,9 @@ def RPE_g_RPY(rpys1, rpys2, increment=1):
 
     rp_g_rpys = np.array([change_in_1[i] / change_in_2[i] for i in range(len(change_in_1))])
 
-    return np.abs(rp_g_rpys)
+    if abs:
+        rp_g_rpys = np.abs(rp_g_rpys)
+    return rp_g_rpys
 
 # DEPRECATED
 
