@@ -13,6 +13,8 @@ The repository contains materials of the course (Perception in robotics, Skoltec
 │ ├── tools                     # contains useful tools utilized in the project
 │ ├── PF_tum.ipynb              # contains experiments with particle filter separately
 │ ├── filters.ipynb             # MAIN! the notebook contains the whole pipeline - from data loading to performance evaluation
+├── README.md
+├── Report.pdf
 ```
 
 ## Requirements
@@ -22,3 +24,6 @@ pip install ahrs mrob prettytable numpy matplotlib
 ```
 
 ## Example output for IEKF
+![Image](https://github.com/user-attachments/assets/a7ff6050-2a13-4e6b-99da-632c4ad2fbde)
+![Image](https://github.com/user-attachments/assets/d0cc7a6c-96b0-488e-b16b-2645113375b1)
+![Image](https://github.com/user-attachments/assets/ce71a93e-b328-4f7e-baa3-7c0f75b7d3b8)
